@@ -26,12 +26,9 @@ public class TimerX extends Thread {
     private int threadId;
     private static long variavelX = 60;
     private long time;
-
     private final UDPControl udpControl;
-
     private final InetAddress address;
     private final byte[] data;
-
     private boolean died;
 
     public TimerX(UDPControl udpc, InetAddress address, byte[] data, int rtt) {
@@ -67,27 +64,23 @@ public class TimerX extends Thread {
             );
 
             if (uf.getSequence() != udpControl.getAckControl().getWaitingFor() && udpControl.getAckControl().getWaitingFor() != 0 && uf.getSequence() != -1) {
-                udpControl.getAckControl().sendAck(udpControl.getAckControl().getWaitingFor() - 1, address, udpControl.getPort() + 1);
+                udpControl.getAckControl().ackSend(udpControl.getAckControl().getWaitingFor() - 1, address, udpControl.getPort() + 1);
                 return;
             } else if (udpControl.getAckControl().getWaitingFor() == uf.getSequence() && uf.getSequence() != -1) {
                 
                 TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Pacote: " + uf.getSequence() + " "
                         + (uf.getSequence() * 100 / (udpControl.getAckControl().getNumPackets() - 1)) + "%");
                 //if (uf.getSequence() != udpControl.getAckControl().getNumPackets()-1)
-                //synchronized(udpControl) {
                     udpControl.getAckControl().setWaitingFor(udpControl.getAckControl().getWaitingFor() + 1);
-                //}
-                udpControl.getAckControl().sendAck(udpControl.getAckControl().getWaitingFor()-1, address, udpControl.getPort() + 1);
+                udpControl.getAckControl().ackSend(udpControl.getAckControl().getWaitingFor()-1, address, udpControl.getPort() + 1);
 
             } else if (uf.getSequence() == -1) {
                 udpControl.getBaos().flush();
-                System.out.println("CHEGOU NO -1");
                 UDPReceiver.closeSsocket();
                 return;
             }
             udpControl.getBaos().write(uf.getContent()); //escreve pacote recebido no array
             
-
         } catch (IOException ex) {
             Logger.getLogger(TimerX.class.getName()).log(Level.SEVERE, null, ex);
 

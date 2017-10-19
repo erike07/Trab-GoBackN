@@ -19,28 +19,27 @@ public class UDPReceiver extends Thread implements UDPControl {
 
     private static int port;
     private static int rtt;
-   
-
     private static final Set<TimerX> timers = Collections.synchronizedSet(new HashSet<TimerX>());
-
     private ByteArrayOutputStream ops;
     private volatile ACKControl ackSender;
     private DatagramPacket receivePacket;
     private static DatagramSocket serverSocket;
 
     public void processAndReceive() throws Exception {
+        long inicioTempotransmisao;
+        long fimTempotransmisao;
+        long totalTempotransmisao;
+        double vazao;
 
         port = TelaReceiver.tprincipalReceiver.getJanela().getPort();
         rtt = TelaReceiver.tprincipalReceiver.getJanela().getRTT();
-        
-
         serverSocket = new DatagramSocket(port);
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Na escuta...");
         int packt = 1600; //precisa ter 87 posições a mais que o client
         byte[] receiveData = new byte[packt];
         receivePacket = new DatagramPacket(receiveData, receiveData.length);
         serverSocket.receive(receivePacket);
-        long start = System.currentTimeMillis();
+        inicioTempotransmisao = System.currentTimeMillis();
         UDPFileInformation ufi = (UDPFileInformation) UDPFile.recoverObj(receivePacket.getData());
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Arquivo a ser recebido");
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Nome: " + ufi.getName());
@@ -54,56 +53,42 @@ public class UDPReceiver extends Thread implements UDPControl {
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Inciando recepção de pacotes");
         ExecutorService requisitionPool = Executors.newFixedThreadPool(1);
         serverSocket.setSoTimeout(2000);
-                
+
         while (ackSender.getWaitingFor() < ackSender.getNumPackets()) {
 
             DatagramPacket receivePkt = new DatagramPacket(receiveData, receiveData.length);
-            
+
             try {
-                System.out.println("\nantes receive");
                 serverSocket.receive(receivePkt);
-                
-                System.out.println("\ndepois receive");
-            }
-            catch (SocketTimeoutException e){
-                System.out.println("\ndeu timeout");       
+            } catch (SocketTimeoutException e) {
                 continue;
             } catch (IOException e) {
                 break;
             }
-            TimerX timerXX = new TimerX(this, receivePkt.getAddress(), receivePkt.getData().clone(),rtt);
-            //requisitionPool.awaitTermination(10, TimeUnit.MILLISECONDS);
-            System.out.println("\nantes requipool");
+            TimerX timerXX = new TimerX(this, receivePkt.getAddress(), receivePkt.getData().clone(), rtt);
             requisitionPool.submit(timerXX);
-            //timerXX.start();
-            System.out.println("\ndepois requipool");
-            
+            //timerXX.inicioTempotransmisao();
             while (timerXX.isDied()) {
                 synchronized (this) {
                     wait(10L);
                 };
             }
         }
-        
+
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Preparando para gravar arquivo");
         FileOutputStream fos = new FileOutputStream("C:\\Users\\2224715\\" + ufi.getName());
         fos.write(ops.toByteArray());
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Arquivo gravado com sucesso");
         fos.close();
-        
         //serverSocket.close();
         //ackSocket.close();
-        long finish = System.currentTimeMillis();
-        long total=0;
-        double vazao=0;
-        total = (finish - start) / 1000;
-        vazao = ( (ufi.getSizeFile() * 8) / 1024) / total;
-        
-        TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Tempo Total do Recebimento: " + total + " segundos");
+        fimTempotransmisao = System.currentTimeMillis();
+        totalTempotransmisao = (fimTempotransmisao - inicioTempotransmisao) / 1000;
+        vazao = ((ufi.getSizeFile() * 8) / 1024) / totalTempotransmisao;
+
+        TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Tempo Total do Recebimento: " + totalTempotransmisao + " segundos");
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Tamanho do Arquivo: " + ufi.getSizeFile() + " Bytes");
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Vazão: " + vazao + " kbps");
-        
-
     }
 
     @Override
@@ -134,11 +119,9 @@ public class UDPReceiver extends Thread implements UDPControl {
     public int getPort() {
         return port;
     }
-    
 
     public static void closeSsocket() {
         serverSocket.close();
     }
-
 
 }

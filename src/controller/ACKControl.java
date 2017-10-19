@@ -93,7 +93,7 @@ public class ACKControl extends Thread {
         return ackN;
     }
 
-    public void sendAck(int sequence, InetAddress ip, int porta) throws SocketException, IOException {
+    public void ackSend(int sequence, InetAddress ip, int porta) throws SocketException, IOException {
         int ackN = 0;
         int tmp;
         final int ACK_LENGTH = 4;

@@ -57,7 +57,6 @@ public class UDPSender extends Thread implements UDPControl {
             baos.write(data, 0, nRead);
         }
         baos.flush();
-
         byte[] sendData2 = baos.toByteArray();
         int cont = 0;
         int seqPckts = 0;
@@ -102,7 +101,6 @@ public class UDPSender extends Thread implements UDPControl {
             TelaSender.tprincipalSender.getJanela().escreverPckt("Pacote Enviado: " + uf.getSequence());
         }
         clientSocket.close();
-
     }
 
     private void windowManager() throws IOException, InterruptedException {
@@ -111,22 +109,15 @@ public class UDPSender extends Thread implements UDPControl {
         Map<Integer, Long> timeEnvio = new HashMap<>();
         String printxSent = "";
         String printJanelas = "";
-//        System.currentTimeMillis();
         DatagramSocket ackSocket = new DatagramSocket(port + 1);
         ackSocket.setSoTimeout(20000);
         ackControl = new ACKControl(ackSocket, buffer.size());
         ackControl.setFlagEnvio(true);
-        //requisitionPool.submit(ackControl);
-        //requisitionPool.awaitTermination(100, TimeUnit.MILLISECONDS);
-
         ackControl.start();
         int pau = 0;
         while (ackControl.getWaitingFor() < buffer.get(buffer.size() - 1).getSequence()) {
-                System.out.println("\ndentro do laço 1\n");
             while (ackControl.getNextSend() < buffer.size() && buffer.get(ackControl.getNextSend()).getSequence() - ackControl.getWaitingFor() < windowSize) {
-                System.out.println("\ndentro do laço 2 "+ackControl.getNextSend()+"\n");
                 if (timeEnvio.get(ackControl.getNextSend()) != null && timeEnvio.get(ackControl.getNextSend()) + timeOut > System.currentTimeMillis()) {
-                    System.out.println("\nNextSend: " + ackControl.getNextSend() + " Tempo2: " + timeEnvio.get(ackControl.getNextSend()));
                     continue;
                 }
                 timeEnvio.put(ackControl.getNextSend(), System.currentTimeMillis());
@@ -139,7 +130,6 @@ public class UDPSender extends Thread implements UDPControl {
                 }
                 TelaSender.tprincipalSender.getJanela().escreverJanelas(printJanelas);
                 if (pau == ackControl.getNextSend()) {
-                    //System.err.println("\n\n\nDEU PAU\n\n\n");
                     ackControl.setNextSend(ackControl.getNextSend() + 1);
                 }
             }
