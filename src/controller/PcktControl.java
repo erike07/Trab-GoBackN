@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
  *
  * @author 2224715
  */
-public interface UDPControl {
+public interface PcktControl {
     
 
     public ACKReceiver getAckControl();

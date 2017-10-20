@@ -1,7 +1,7 @@
 package model;
 
 
-import controller.UDPReceiver;
+import controller.PcktReceiver;
 import java.beans.Transient;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

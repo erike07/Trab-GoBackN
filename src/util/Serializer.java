@@ -5,8 +5,8 @@
  */
 package util;
 
-import controller.UDPReceiver;
-import controller.UDPSender;
+import controller.PcktReceiver;
+import controller.PcktSender;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class Serializer {
             return baos.toByteArray();
 
         } catch (IOException ex) {
-            Logger.getLogger(UDPSender.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PcktSender.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -40,9 +40,9 @@ public class Serializer {
             ObjectInputStream ois = new ObjectInputStream(bais);
             return ois.readObject();
         } catch (IOException ex) {
-            Logger.getLogger(UDPReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PcktReceiver.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UDPReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PcktReceiver.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

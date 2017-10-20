@@ -11,9 +11,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.UDPFile;
@@ -25,7 +25,7 @@ import view.TelaReceiver;
  */
 public class ACKSender extends Thread {
 
-    private Set<UDPFile> packts = Collections.synchronizedSet(new HashSet<>());
+    private List<UDPFile> packts = Collections.synchronizedList(new ArrayList<>());
 
     private int waitingFor;
     private int port;
@@ -33,6 +33,7 @@ public class ACKSender extends Thread {
     private ByteArrayOutputStream ops;
     private int numPackets;
     private boolean endFlag;
+    private boolean travaFlag = false;
 
     public ACKSender(InetAddress ip, int port, ByteArrayOutputStream ops, int numPackets) {
 
@@ -53,11 +54,16 @@ public class ACKSender extends Thread {
             if (uf != null) {
                 processaPacote(uf);
             }
+            try {
+                sleep(1L);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ACKSender.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
     private synchronized UDPFile moduloAtraso() {
-        
+
         for (UDPFile packt : packts) {
             if (packt.getTn() <= System.currentTimeMillis()) {
                 packts.remove(packt);
@@ -85,7 +91,7 @@ public class ACKSender extends Thread {
                 ackSend(waitingFor - 1, ip, port + 1);
 
             } else if (uf.getSequence() == -1) {
-                UDPReceiver.closeSsocket();
+                PcktReceiver.closeSsocket();
                 return;
             }
             ops.write(uf.getContent()); //escreve pacote recebido no array
@@ -115,8 +121,20 @@ public class ACKSender extends Thread {
 
     }
 
+    private boolean moduloPerda() {
+        double p = Math.random() * 100;
+        return (p < 1 - p) ? true : false;
+    }
+    
+    
+
     public synchronized void addPacketToSet(UDPFile uf) {
-        packts.add(uf);
+        if (!moduloPerda()) {
+            packts.add(uf);
+        } else {
+            TelaReceiver.tprincipalReceiver.getJanela().escreverPckperdido("\nPacote Perdido: " + uf.getSequence());
+        }
+
     }
 
     public int getWaitingFor() {
@@ -137,6 +155,14 @@ public class ACKSender extends Thread {
 
     public void setEndFlag(boolean endFlag) {
         this.endFlag = endFlag;
+    }
+
+    public boolean isTravado() {
+        return travaFlag;
+    }
+
+    public void setTravado(boolean travaFlag) {
+        this.travaFlag = travaFlag;
     }
 
 }

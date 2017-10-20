@@ -20,7 +20,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import controller.UDPSender;
+import controller.PcktSender;
 
 /**
  *
@@ -28,7 +28,7 @@ import controller.UDPSender;
  */
 public class TelaSender extends JFrame {
 
-    UDPSender sender;
+    PcktSender sender;
     private JLabel lbTit, lbFile, lbIPDst, lbPort, lbRTT, lbMSS, lbWsize, lbTimeout;
     private JFileChooser fcDir;
     private JTextField tfIP, tfPort, tfDir, tfRTT, tfMSS, tfWsize, tfTimeout;
@@ -181,14 +181,14 @@ public class TelaSender extends JFrame {
 //                    port = Integer.parseInt(tfPort.getText());
 //                    fileName = selectedFile.getPath();
 //                    dir = selectedFile.getName();
-                    sender = new UDPSender(fileName, dir, InetAddress.getByName(tfIP.getText().trim()), Integer.parseInt(tfPort.getText()), Integer.parseInt(tfWsize.getText()), Integer.parseInt(tfTimeout.getText()), Integer.parseInt(tfMSS.getText()));
+                    sender = new PcktSender(fileName, dir, InetAddress.getByName(tfIP.getText().trim()), Integer.parseInt(tfPort.getText()), Integer.parseInt(tfWsize.getText()), Integer.parseInt(tfTimeout.getText()), Integer.parseInt(tfMSS.getText()));
                     sender.start();
                     //sender.processAndSend();
 
                 } catch (UnknownHostException ex) {
-                    Logger.getLogger(UDPSender.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PcktSender.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (Exception ex) {
-                    Logger.getLogger(UDPSender.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PcktSender.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

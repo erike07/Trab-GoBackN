@@ -6,7 +6,7 @@
 package view;
 
 
-import controller.UDPReceiver;
+import controller.PcktReceiver;
 
 
 /**
@@ -170,7 +170,7 @@ public class JanelaReceiver extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        UDPReceiver udpReceiver = new UDPReceiver();
+        PcktReceiver udpReceiver = new PcktReceiver();
         udpReceiver.start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
