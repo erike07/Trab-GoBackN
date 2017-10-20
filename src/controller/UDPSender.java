@@ -1,7 +1,7 @@
 package controller;
 
-import util.UDPFile;
-import util.UDPFileInformation;
+import model.UDPFile;
+import model.UDPFileInformation;
 import java.io.*;
 import java.net.*;
 import java.util.logging.Level;
@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import util.Serializer;
 import view.TelaSender;
 
 public class UDPSender extends Thread implements UDPControl {
@@ -21,7 +22,7 @@ public class UDPSender extends Thread implements UDPControl {
     private int timeOut; //tempo em ms
     private int windowSize; //tamanho da janela de envio
     private int mss;
-    private volatile ACKControl ackControl;
+    private volatile ACKReceiver ackControl;
 
     @Override
     public void run() {
@@ -65,7 +66,7 @@ public class UDPSender extends Thread implements UDPControl {
         UDPFileInformation ufi = new UDPFileInformation(fileName, sendData2.length, totalPackts);
         DatagramSocket clientSocket;
         clientSocket = new DatagramSocket();
-        byte[] fileByteInfo = serializeObj(ufi);
+        byte[] fileByteInfo = Serializer.serializeObj(ufi);
 
         DatagramPacket sendPacketInfo = new DatagramPacket(fileByteInfo, fileByteInfo.length, ip, port);
         clientSocket.send(sendPacketInfo);
@@ -94,7 +95,7 @@ public class UDPSender extends Thread implements UDPControl {
     private void packetSend(UDPFile uf) throws SocketException, IOException {
 
         DatagramSocket clientSocket = new DatagramSocket();
-        byte[] fileByte = serializeObj(uf);
+        byte[] fileByte = Serializer.serializeObj(uf);
         DatagramPacket sendPacket = new DatagramPacket(fileByte, fileByte.length, ip, port);
         clientSocket.send(sendPacket);
         if (uf.getSequence() != -1) {
@@ -111,7 +112,7 @@ public class UDPSender extends Thread implements UDPControl {
         String printJanelas = "";
         DatagramSocket ackSocket = new DatagramSocket(port + 1);
         ackSocket.setSoTimeout(20000);
-        ackControl = new ACKControl(ackSocket, buffer.size());
+        ackControl = new ACKReceiver(ackSocket, buffer.size());
         ackControl.setFlagEnvio(true);
         ackControl.start();
         int pau = 0;
@@ -148,26 +149,14 @@ public class UDPSender extends Thread implements UDPControl {
 
     }
 
-    private byte[] serializeObj(Object obj) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream ous = new ObjectOutputStream(baos);
-            ous.writeObject(obj);
-            return baos.toByteArray();
-
-        } catch (IOException ex) {
-            Logger.getLogger(UDPSender.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
 
     @Override
-    public ACKControl getAckControl() {
+    public ACKReceiver getAckControl() {
         return ackControl;
     }
 
     @Override
-    public void setAckControl(ACKControl ackSender) {
+    public void setAckControl(ACKReceiver ackSender) {
         this.ackControl = ackSender;
     }
 

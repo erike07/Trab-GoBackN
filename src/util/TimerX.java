@@ -5,6 +5,7 @@
  */
 package util;
 
+import model.UDPFile;
 import controller.UDPControl;
 import controller.UDPReceiver;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class TimerX extends Thread {
     @Override
     public synchronized void run() {
 
-        UDPFile uf = (UDPFile) UDPFile.recoverObj(data);//is.readObject();
+        UDPFile uf = (UDPFile) Serializer.recoverObj(data);//is.readObject();
         died = false;
         if (perdaEatraso(uf.getSequence())) return; 
         

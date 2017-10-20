@@ -1,7 +1,8 @@
-package util;
+package model;
 
 
 import controller.UDPReceiver;
+import java.beans.Transient;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,7 +16,8 @@ public class UDPFile implements Serializable {
 
     private byte[] content;
     private int sequence; // Dois bytes = 65536
-
+    private transient long tn;
+    
     public byte[] getContent() {
         return content;
     }
@@ -32,6 +34,14 @@ public class UDPFile implements Serializable {
         this.sequence = sequence;
     }
 
+    public long getTn() {
+        return tn;
+    }
+
+    public void setTn(long tn) {
+        this.tn = tn;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 7;
@@ -53,18 +63,5 @@ public class UDPFile implements Serializable {
         }
         return true;
     }
-    
-    public static Object recoverObj(byte[] bytes) {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return ois.readObject();
-        } catch (IOException ex) {
-            Logger.getLogger(UDPReceiver.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UDPReceiver.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-    
+       
 }

@@ -5,15 +5,39 @@
  */
 package view;
 
+import java.io.Serializable;
+import util.Serializer;
+
 /**
  *
  * @author 2224715
  */
-public class NewClass {
-    public static void main(String[] args) {
-        for (double i = 0; i < 10000; i++) {
-            System.out.println(x1(i)); 
+public class NewClass{
+    
+    static class A implements Serializable{
+        public int x;
+        public int y;
+        public transient int z;
+
+        public A(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
+
+        @Override
+        public String toString() {
+            return "A{" + "x=" + x + ", y=" + y + ", z=" + z + '}';
+        }
+        
+    }
+    
+    public static void main(String[] args) {
+        A a = new A(1,2,3);
+        byte[] b = Serializer.serializeObj(a);
+        A a2 = (A)Serializer.recoverObj(b);
+        System.out.println(b.length);
+        System.out.println(a2);
     }
     
     private static double x1(double x) {

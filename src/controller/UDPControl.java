@@ -14,9 +14,9 @@ import java.io.ByteArrayOutputStream;
 public interface UDPControl {
     
 
-    public ACKControl getAckControl();
+    public ACKReceiver getAckControl();
 
-    public void setAckControl(ACKControl ackSender);
+    public void setAckControl(ACKReceiver ackSender);
 
     public ByteArrayOutputStream getBaos();
     

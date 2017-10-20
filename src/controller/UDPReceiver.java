@@ -1,8 +1,8 @@
 package controller;
 
 import view.JanelaReceiver;
-import util.UDPFile;
-import util.UDPFileInformation;
+import model.UDPFile;
+import model.UDPFileInformation;
 import java.io.*;
 import java.net.*;
 import java.util.Collections;
@@ -12,16 +12,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import util.Serializer;
 import util.TimerX;
 import view.TelaReceiver;
 
-public class UDPReceiver extends Thread implements UDPControl {
+public class UDPReceiver extends Thread  {
 
     private static int port;
     private static int rtt;
     private static final Set<TimerX> timers = Collections.synchronizedSet(new HashSet<TimerX>());
     private ByteArrayOutputStream ops;
-    private volatile ACKControl ackSender;
+    private ACKSender ackSender;
     private DatagramPacket receivePacket;
     private static DatagramSocket serverSocket;
 
@@ -40,7 +41,7 @@ public class UDPReceiver extends Thread implements UDPControl {
         receivePacket = new DatagramPacket(receiveData, receiveData.length);
         serverSocket.receive(receivePacket);
         inicioTempotransmisao = System.currentTimeMillis();
-        UDPFileInformation ufi = (UDPFileInformation) UDPFile.recoverObj(receivePacket.getData());
+        UDPFileInformation ufi = (UDPFileInformation) Serializer.recoverObj(receivePacket.getData());
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Arquivo a ser recebido");
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Nome: " + ufi.getName());
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Tamanho(B): " + ufi.getSizeFile());
@@ -48,14 +49,15 @@ public class UDPReceiver extends Thread implements UDPControl {
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("\n");
         ops = new ByteArrayOutputStream();
         DatagramSocket ackSocket = new DatagramSocket();
-        ackSender = new ACKControl(ackSocket, ufi.getNumPackets());
+        ackSender = new ACKSender(receivePacket.getAddress(), port ,ops, ufi.getNumPackets());
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Total: " + ackSender.getNumPackets());
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Inciando recepção de pacotes");
         ExecutorService requisitionPool = Executors.newFixedThreadPool(1);
         serverSocket.setSoTimeout(2000);
 
+        ackSender.start();
         while (ackSender.getWaitingFor() < ackSender.getNumPackets()) {
-
+ 
             DatagramPacket receivePkt = new DatagramPacket(receiveData, receiveData.length);
 
             try {
@@ -65,16 +67,12 @@ public class UDPReceiver extends Thread implements UDPControl {
             } catch (IOException e) {
                 break;
             }
-            TimerX timerXX = new TimerX(this, receivePkt.getAddress(), receivePkt.getData().clone(), rtt);
-            requisitionPool.submit(timerXX);
-            //timerXX.inicioTempotransmisao();
-            while (timerXX.isDied()) {
-                synchronized (this) {
-                    wait(10L);
-                };
-            }
+            UDPFile uf = (UDPFile) Serializer.recoverObj(receivePkt.getData().clone()); 
+            uf.setTn(System.currentTimeMillis()+5);
+            ackSender.addPacketToSet(uf);
         }
-
+        ackSender.setEndFlag(true);
+        ops.flush();
         TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Preparando para gravar arquivo");
         FileOutputStream fos = new FileOutputStream("C:\\Users\\2224715\\" + ufi.getName());
         fos.write(ops.toByteArray());
@@ -100,22 +98,18 @@ public class UDPReceiver extends Thread implements UDPControl {
         }
     }
 
-    @Override
     public ByteArrayOutputStream getBaos() {
         return ops;
     }
 
-    @Override
-    public ACKControl getAckControl() {
+    public ACKSender getAckControl() {
         return ackSender;
     }
 
-    @Override
-    public void setAckControl(ACKControl ackSender) {
-        ackSender = ackSender;
+    public void setAckControl(ACKSender ackSender) {
+        this.ackSender = ackSender;
     }
 
-    @Override
     public int getPort() {
         return port;
     }
