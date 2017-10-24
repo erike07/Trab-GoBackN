@@ -48,6 +48,7 @@ public class ACKReceiver extends Thread {
         while (waitingFor < numPackets ) {
             try {
                 ackRecebido = ackReceive();
+                
                 if (waitingFor > ackRecebido) {
                     waitingFor = lastAck + 1;
                     nextSend = waitingFor;    
@@ -91,8 +92,6 @@ public class ACKReceiver extends Thread {
         TelaSender.tprincipalSender.getJanela().escreverAcks("Ack Recebido: " + ackN);
         return ackN;
     }
-
-    
 
     public int getNextSend() {
         return nextSend;
