@@ -83,18 +83,16 @@ public class ACKSender extends Thread {
                 ackSend(waitingFor - 1, ip, port + 1);
                 return;
             } else if (waitingFor == uf.getSequence() && uf.getSequence() != -1) {
-
-                TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Pacote: " + uf.getSequence() + " "
-                        + (uf.getSequence() * 100 / (numPackets - 1)) + "%");
                 //if (uf.getSequence() != udpControl.getAckControl().getNumPackets()-1)
                 waitingFor++;
                 ackSend(waitingFor - 1, ip, port + 1);
-
+                ops.write(uf.getContent()); //escreve pacote recebido no array
+                TelaReceiver.tprincipalReceiver.getJanela().escreverPcktrec("Pacote Gravado: " + uf.getSequence() + " "+ (uf.getSequence() * 100 / (numPackets - 1)) + "%");
             } else if (uf.getSequence() == -1) {
                 PcktReceiver.closeSsocket();
                 return;
             }
-            ops.write(uf.getContent()); //escreve pacote recebido no array
+            
         } catch (IOException ex) {
             Logger.getLogger(ACKSender.class.getName()).log(Level.SEVERE, null, ex);
         }

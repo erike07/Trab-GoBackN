@@ -25,7 +25,6 @@ public class ACKReceiver extends Thread {
     private final DatagramSocket ackSocket;
     private volatile int nextSend;
     private volatile int waitingFor;
-    private volatile boolean flagEnvio;
     private int numPackets;
 
     public ACKReceiver(DatagramSocket ackSocket, int numPackets) {
@@ -113,13 +112,4 @@ public class ACKReceiver extends Thread {
         return numPackets;
     }
 
-    public boolean getFlagEnvio() {
-        return flagEnvio;
-    }
-
-    public synchronized void setFlagEnvio(boolean deuTimeOut) {
-        this.flagEnvio = deuTimeOut;
-    }
-    
-    
 }

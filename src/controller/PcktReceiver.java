@@ -67,8 +67,8 @@ public class PcktReceiver extends Thread {
             }
 
             UDPFile uf = (UDPFile) Serializer.recoverObj(receivePkt.getData().clone());
-            //double p = Math.random() * 1000;
-            uf.setTn(System.currentTimeMillis() + (long) rtt);
+            double p = Math.random() * 1000;
+            uf.setTn(System.currentTimeMillis() + (long)p);
                         
             if (uf.getSequence() != -1) {
                 atraso[indiceAtraso] = uf.getTn() - System.currentTimeMillis();

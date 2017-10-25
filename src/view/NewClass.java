@@ -45,42 +45,30 @@ public class NewClass{
 //        A a2 = (A)Serializer.recoverObj(b);
 //        System.out.println(b.length);
 //        System.out.println(a2);
-        for (int i=1; i<400; i++)
-        {
-            System.out.println("\n Valor: "+x1(i));
-        }
+        double r =  Math.random() * 200;
+        //System.out.println("r:"+r);
+        r=Math.round(r);
+        System.out.println("r:"+r);
+        //System.out.println("r round:" +Math.round(r));
+        
+        //for (int i=1; i<400; i++)
+        //{
+            x1(r);
+            //System.out.println("\n Valor: "+x1(r));
+        //}
     }
     
     private static double x1(double x) {
-        double tAtual = 1, lambda = 0.5, rtt=200, n2=0, test=0; 
-        ExponentialDistribution t = new ExponentialDistribution(rtt);
-          // P(T(29) <= -2.656)
-        AbstractRandomGenerator n = new AbstractRandomGenerator() {
-            @Override
-            public void setSeed(long seed) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public double nextDouble() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-        test = t.cumulativeProbability(rtt);
-        n2=n.nextLong();
-       
-//        //double upperTail = 1.0 - t.cumulativeProbability(2.75); // P(T(29) >= 2.75)
-//
-//        tAtual = (test + (rtt / 2.0) + test);
-//        tAtual = tAtual * 10;
-
-        //x = Math.random() * 50;
-        System.out.println("\ntest: "+test);
-        System.out.println("\nn2: "+n2);
-        //System.out.println("\nt: "+t);
+        double tAtual = 1, lambda = 0.5, rtt=200, exp=0, er; 
         
-        tAtual = (test + (rtt / 2.0) + (lambda * Math.pow(Math.E, (-lambda) * test)));
-
+        ExponentialDistribution e = new ExponentialDistribution(x);
+        exp = e.cumulativeProbability(x);
+        //exp = lambda * Math.pow(Math.E, (-lambda) * x);
+        //Math.round(exp);
+        //System.out.println("\nexp: "+exp);
+        System.out.println("\nEXP: "+exp);
+        tAtual = x + (rtt / 2.0) + exp;
+        System.out.println("\ntempo: "+tAtual);
         return tAtual;
            
     }

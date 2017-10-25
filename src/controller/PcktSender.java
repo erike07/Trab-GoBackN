@@ -111,9 +111,8 @@ public class PcktSender extends Thread implements PcktControl {
         String printxSent = "";
         String printJanelas = "";
         DatagramSocket ackSocket = new DatagramSocket(port + 1);
-        ackSocket.setSoTimeout(20000);
+        //ackSocket.setSoTimeout(20000);
         ackControl = new ACKReceiver(ackSocket, buffer.size());
-        ackControl.setFlagEnvio(true);
         ackControl.start();
         int pau = 0;
         while (ackControl.getWaitingFor() <= buffer.get(buffer.size() - 1).getSequence()) {
@@ -134,7 +133,6 @@ public class PcktSender extends Thread implements PcktControl {
                     ackControl.setNextSend(ackControl.getNextSend() + 1);
                 }
             }
-            ackControl.setFlagEnvio(false);
             
         }
 
